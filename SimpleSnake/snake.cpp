@@ -2,8 +2,12 @@
 #include <random>
 #include <ctime>
 
-snake::snake(coordinates f): field(f ), dir(right) {
-	body.push_back({ 0,0 });
+snake::snake(coordinates f): field(f ) {
+	coordinates temp = { 0,0 };
+	this->body.push_back(std::make_pair(temp,right));
+}
+uint snake::get_size() {
+	return this->body.size();
 }
 void snake::draw_head() {
 	std::cout << "@";
@@ -11,39 +15,113 @@ void snake::draw_head() {
 void snake::draw_body() {
 	std::cout << "*";
 }
-void snake::eat(){}
-bool snake::is_head(coordinates coord) {
-	return coord == this->body[0];
-}
-void snake::go() {
-	switch (this->dir)
-	{
+void snake::eat(){
+	auto last = this->body.rbegin();
+	coordinates coord = last->first;
+	switch (last->second) {
 	case up:
-		if (this->body[0].y == 0)
-			this->body[0].y = this->field.y - 1;
-		else
-			this->body[0].y--;
+		coord.y++;
+		if (coord.y == this->field.y)
+			coord.y = 0;
 		break;
 	case down:
-		this->body[0].y++;
-		if (this->body[0].y == this->field.y)
-			this->body[0].y = 0;
+		coord.y--;
+		if (coord.y < 0)
+			coord.y = this->field.y - 1;
 		break;
 	case left:
-		if (this->body[0].x == 0)
-			this->body[0].x = this->field.x - 1;
-		else
-			this->body[0].x--;
+		coord.x++;
+		if (coord.x == this->field.x)
+			coord.x = 0;
 		break;
 	case right:
-		this->body[0].x++;
-		if (this->body[0].x == this->field.x)
-			this->body[0].x = 0;
+		coord.x--;
+		if (coord.x < 0)
+			coord.y = this->field.x - 1;
+		break;
+	}
+	if (this->is_head(coord))
+		throw false;
+
+	this->body.push_back(std::make_pair(coord, last->second));
+}
+bool snake::is_head(coordinates coord) {
+	return coord == this->body[0].first;
+}
+void snake::go() {
+	std::vector<std::pair<coordinates, direction>>::iterator it = this->body.begin();
+	this->go(it);
+	direction next = it->second;
+	it++;
+	for (auto before_it = this->body.begin(); it != this->body.end(); it++, before_it++) {
+		this->go(it);
+		direction temp = it->second;
+		it->second = next;
+		next = temp;
+		if (this->is_head(it->first))
+			throw false;
+	}
+}
+void snake::go(std::vector<std::pair<coordinates, direction>>::iterator it) {
+	switch (it->second)
+	{
+	case up:
+		if (it->first.y == 0)
+			it->first.y = this->field.y - 1;
+		else
+			it->first.y--;
+		break;
+	case down:
+		it->first.y++;
+		if (it->first.y == this->field.y)
+			it->first.y = 0;
+		break;
+	case left:
+		if (it->first.x == 0)
+			it->first.x = this->field.x - 1;
+		else
+			it->first.x--;
+		break;
+	case right:
+		it->first.x++;
+		if (it->first.x == this->field.x)
+			it->first.x = 0;
 		break;
 	}
 }
 void snake::change_dir(direction new_dir) {
-	this->dir = new_dir;
+	switch (new_dir)
+	{
+	case up:
+		if (body[0].second == down)
+			return;
+		break;
+	case down:
+		if (body[0].second == up)
+			return;
+		break;
+	case left:
+		if (body[0].second == right)
+			return;
+		break;
+	case right:
+		if (body[0].second == left)
+			return;
+		break;
+	default:
+		break;
+	}
+	this->body[0].second = new_dir;
+}
+bool snake::is_body(coordinates coord) {
+	auto it = this->body.begin();
+	it++;
+	for (; it != this->body.end(); it++) {
+		if (it->first == coord) {
+			return true;
+		}
+	}
+	return false;
 }
 
 

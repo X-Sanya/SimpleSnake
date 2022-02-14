@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <utility>
 
 typedef unsigned uint;
 
@@ -37,9 +38,9 @@ public:
 
 class snake {
 private:
-	std::vector<coordinates> body;
+	std::vector<std::pair<coordinates, direction>> body;
 	coordinates field;
-	direction dir;
+	void go(std::vector<std::pair<coordinates, direction>>::iterator);
 public:
 	snake(coordinates);
 	~snake(){}
@@ -50,5 +51,6 @@ public:
 	void draw_body();
 	void change_dir(direction);
 	void go();
+	uint get_size();
 };
 #endif //SNAKE
