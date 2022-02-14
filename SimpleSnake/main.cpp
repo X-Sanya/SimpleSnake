@@ -41,6 +41,7 @@ int main() {
 	if (my_snake != nullptr)
 		delete my_snake;
 	my_snake = nullptr;
+	system("pause");
 	return 0;
 }
 
